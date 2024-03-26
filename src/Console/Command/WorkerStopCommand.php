@@ -24,9 +24,10 @@ class WorkerStopCommand extends AbstractCommand
 
     protected function configure()
     {
+        parent::configure();
         $this->setDescription('Stop listening the queue.')
             ->setHelp('This Command allows you to stop listening the queue.')
-            ->addOption('channel', 't', InputOption::VALUE_REQUIRED, 'The channel of queue.', 'default');
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

@@ -15,7 +15,7 @@ return [
         'driver' => [
             'class' => RedisQueue::class,
             'connection' => [
-                'host' => '127.0.0.1',
+                'host' => 'redis',
                 'port' => 6379,
                 'database' => '0',
                 // 'password' => 'password',

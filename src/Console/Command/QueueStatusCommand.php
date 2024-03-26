@@ -23,9 +23,9 @@ class QueueStatusCommand extends AbstractCommand
 
     protected function configure()
     {
+        parent::configure();
         $this->setDescription('Get the execute status of specific queue.')
-            ->setHelp('This Command allows you to get the execute status of specific queue.')
-            ->addOption('channel', 't', InputOption::VALUE_REQUIRED, 'The channel of queue.', 'default');
+            ->setHelp('This Command allows you to get the execute status of specific queue.');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

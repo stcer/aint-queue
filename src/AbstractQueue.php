@@ -12,9 +12,7 @@ declare(strict_types=1);
 
 namespace Littlesqx\AintQueue;
 
-use Littlesqx\AintQueue\Serializer\ClosureSerializer;
-use Littlesqx\AintQueue\Serializer\CompressingSerializer;
-use Littlesqx\AintQueue\Serializer\PhpSerializer;
+use Littlesqx\AintQueue\Driver\JobMessageParser;
 
 abstract class AbstractQueue implements QueueInterface
 {
@@ -47,31 +45,20 @@ abstract class AbstractQueue implements QueueInterface
     const STATUS_FAILED = 4;
 
     /**
-     * @var PhpSerializer
-     */
-    protected $phpSerializer;
-
-    /**
-     * @var ClosureSerializer
-     */
-    protected $closureSerializer;
-
-    /**
-     * @var CompressingSerializer
-     */
-    protected $compressingSerializer;
-    /**
      * @var array
      */
     protected $options;
+
+    /**
+     * @var JobMessageParser
+     */
+    protected $messageParser;
 
     public function __construct(string $channel, array $options = [])
     {
         $this->channel = $channel;
         $this->options = $options;
-        $this->phpSerializer = new PhpSerializer();
-        $this->closureSerializer = new ClosureSerializer();
-        $this->compressingSerializer = new CompressingSerializer();
+        $this->messageParser = JobMessageParser::getInstance();
     }
 
     /**

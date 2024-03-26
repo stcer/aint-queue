@@ -13,12 +13,10 @@ declare(strict_types=1);
 namespace Littlesqx\AintQueue\Driver\Redis;
 
 use Littlesqx\AintQueue\AbstractQueue;
-use Littlesqx\AintQueue\Compressable;
 use Littlesqx\AintQueue\Connection\RedisConnector;
 use Littlesqx\AintQueue\Exception\InvalidArgumentException;
 use Littlesqx\AintQueue\Exception\InvalidJobException;
 use Littlesqx\AintQueue\JobInterface;
-use Littlesqx\AintQueue\Serializer\Factory;
 use Predis\Client;
 use Predis\Collection\Iterator\Keyspace;
 use Swoole\Coroutine;
@@ -76,7 +74,7 @@ class Queue extends AbstractQueue
     /**
      * Push an executable job message into queue.
      *
-     * @param \Closure|JobInterface $message
+     * @param \Closure|JobInterface|string|array $message
      * @param int                   $delay
      *
      * @return mixed
@@ -85,30 +83,7 @@ class Queue extends AbstractQueue
      */
     public function push($message, int $delay = 0): void
     {
-        $serializedMessage = null;
-        $serializerType = null;
-
-        if (is_callable($message)) {
-            $serializedMessage = $this->closureSerializer->serialize($message);
-            $serializerType = Factory::SERIALIZER_TYPE_CLOSURE;
-        } elseif ($message instanceof JobInterface) {
-            if ($message instanceof Compressable) {
-                $serializedMessage = $this->compressingSerializer->serialize($message);
-                $serializerType = Factory::SERIALIZER_TYPE_COMPRESSING;
-            } else {
-                $serializedMessage = $this->phpSerializer->serialize($message);
-                $serializerType = Factory::SERIALIZER_TYPE_PHP;
-            }
-        } else {
-            $type = is_object($message) ? get_class($message) : gettype($message);
-            throw new InvalidArgumentException($type.' type message is not allowed.');
-        }
-
-        $pushMessage = json_encode([
-            'serializerType' => $serializerType,
-            'serializedMessage' => $serializedMessage,
-        ]);
-
+        $pushMessage = $this->messageParser->makePushMessage($message);
         $redis = $this->getConnection();
 
         $id = $redis->incr("{$this->channelPrefix}{$this->channel}:message_id");
@@ -298,13 +273,12 @@ class Queue extends AbstractQueue
         $attempts = $redis->hget("{$this->channelPrefix}{$this->channel}:attempts", $id);
         $payload = $redis->hget("{$this->channelPrefix}{$this->channel}:messages", $id);
 
-        if (empty($payload) || empty($message = json_decode($payload, true)) || !isset($message['serializerType'])) {
+        $jobInstance = $this->messageParser->parseJobMessage($payload);
+        if (empty($jobInstance)) {
             throw new InvalidJobException(sprintf('Broken message payload[%d]: %s', $id, $payload));
         }
 
-        $serializer = Factory::getInstance($message['serializerType']);
-
-        return [$id, (int) $attempts, $serializer->unSerialize($message['serializedMessage'])];
+        return [$id, (int) $attempts, $jobInstance];
     }
 
     /**

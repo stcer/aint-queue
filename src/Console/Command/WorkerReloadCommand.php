@@ -24,9 +24,10 @@ class WorkerReloadCommand extends AbstractCommand
 
     protected function configure()
     {
+        parent::configure();
         $this->setDescription('Reload worker for the queue.')
             ->setHelp('This Command allows you to reload worker for the queue.')
-            ->addOption('channel', 't', InputOption::VALUE_REQUIRED, 'The channel of queue.', 'default');
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

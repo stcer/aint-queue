@@ -12,29 +12,40 @@ declare(strict_types=1);
 
 namespace Littlesqx\AintQueue\Serializer;
 
+use Closure;
 use Littlesqx\AintQueue\Exception\InvalidArgumentException;
+use function call_user_func;
 
 class Factory
 {
     /**
      * @const string
      */
-    const SERIALIZER_TYPE_PHP = 'php_serializer';
+    const SERIALIZER_TYPE_PHP = 's';
+
+    const SERIALIZER_TYPE_JSON = 'j';
 
     /**
      * @const string
      */
-    const SERIALIZER_TYPE_CLOSURE = 'closure_serializer';
+    const SERIALIZER_TYPE_CLOSURE = 'cls';
 
     /**
      * @const string
      */
-    const SERIALIZER_TYPE_COMPRESSING = 'compressing_serializer';
+    const SERIALIZER_TYPE_COMPRESSING = 'cmp';
 
     /**
      * @var SerializerInterface[]
      */
     public static $instances = [];
+
+    public static $serializerTypes = [
+        self::SERIALIZER_TYPE_JSON => self::SERIALIZER_TYPE_JSON,
+        self::SERIALIZER_TYPE_PHP => self::SERIALIZER_TYPE_PHP,
+        self::SERIALIZER_TYPE_CLOSURE => self::SERIALIZER_TYPE_CLOSURE,
+        self::SERIALIZER_TYPE_COMPRESSING => self::SERIALIZER_TYPE_COMPRESSING
+    ];
 
     /**
      * Get a instance for serializer.
@@ -47,9 +58,10 @@ class Factory
      */
     public static function getInstance(string $type): SerializerInterface
     {
-        if (!in_array($type, [self::SERIALIZER_TYPE_PHP, self::SERIALIZER_TYPE_CLOSURE, self::SERIALIZER_TYPE_COMPRESSING], true)) {
+        if (!isset(static::$serializerTypes[$type])) {
             throw new InvalidArgumentException("The arg type: {$type} is invalid.");
         }
+
         if (!isset(self::$instances[$type])) {
             self::$instances[$type] = self::make($type);
         }
@@ -64,8 +76,12 @@ class Factory
      *
      * @return SerializerInterface|null
      */
-    public static function make(string $type): ? SerializerInterface
+    public static function make(string $type): ?SerializerInterface
     {
+        if (isset(static::$serializerTypes[$type]) && static::$serializerTypes[$type] instanceof Closure) {
+            return call_user_func(static::$serializerTypes[$type]);
+        }
+
         switch ($type) {
             case self::SERIALIZER_TYPE_PHP:
                 return new PhpSerializer();
@@ -73,6 +89,8 @@ class Factory
                 return new ClosureSerializer();
             case self::SERIALIZER_TYPE_COMPRESSING:
                 return new CompressingSerializer();
+            case self::SERIALIZER_TYPE_JSON:
+                return new JsonSerializer();
             default:
                 return null;
         }

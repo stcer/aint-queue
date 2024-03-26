@@ -27,9 +27,9 @@ class QueueDashboardCommand extends AbstractCommand
 
     protected function configure()
     {
+        parent::configure();
         $this->setDescription('Start http server for dashboard.')
             ->setHelp('This Command allows you to start http server for dashboard.')
-            ->addOption('channel', 't', InputOption::VALUE_REQUIRED, 'The channel of queue.', 'default')
             ->addOption('addr', 'a', InputOption::VALUE_REQUIRED, 'The listen address([host]:[port]) for server.', '127.0.0.1:8001');
     }
 
