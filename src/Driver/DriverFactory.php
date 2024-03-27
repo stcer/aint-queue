@@ -12,8 +12,12 @@ declare(strict_types=1);
 
 namespace Littlesqx\AintQueue\Driver;
 
+use Closure;
 use Littlesqx\AintQueue\Exception\InvalidDriverException;
 use Littlesqx\AintQueue\QueueInterface;
+use function call_user_func;
+use function is_string;
+use function method_exists;
 
 class DriverFactory
 {
@@ -38,6 +42,16 @@ class DriverFactory
 
         if (!$driver instanceof QueueInterface) {
             throw new InvalidDriverException(sprintf('[Error] class %s is not instanceof %s.', $driverClass, QueueInterface::class));
+        }
+
+        $encoder = $options['encoder'] ?? null;
+        if ($encoder && method_exists($driver, 'setMessageEncoder')) {
+            if ($encoder instanceof Closure) {
+                $encoder = call_user_func($encoder);
+            } elseif (is_string($encoder)) {
+                $encoder = new $encoder();
+            }
+            $driver->setMessageEncoder($encoder);
         }
 
         return $driver;

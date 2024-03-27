@@ -8,6 +8,7 @@
  * This source file is subject to the MIT license that is bundled.
  */
 
+use App\Job\MessageEncoder;
 use Littlesqx\AintQueue\Driver\Redis\Queue as RedisQueue;
 
 return [
@@ -20,6 +21,7 @@ return [
                 'database' => '0',
                 // 'password' => 'password',
             ],
+            'encoder' => MessageEncoder::class,
         ],
         'logger' => [
             'class' => \Littlesqx\AintQueue\Logger\DefaultLogger::class,

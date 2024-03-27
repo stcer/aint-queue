@@ -1,11 +1,11 @@
 <?php
 #MessageMaker.php created by stcer@jz at 2024/3/21
-namespace Littlesqx\AintQueue\Driver;
+namespace Littlesqx\AintQueue\Serializer;
 
 use Littlesqx\AintQueue\Compressable;
 use Littlesqx\AintQueue\Exception\InvalidArgumentException;
 use Littlesqx\AintQueue\JobInterface;
-use Littlesqx\AintQueue\Serializer\Factory;
+use Littlesqx\AintQueue\JobMessageEncoderInterface;
 use function get_class;
 use function gettype;
 use function is_array;
@@ -15,7 +15,7 @@ use function is_string;
 use function json_decode;
 use function json_encode;
 
-class JobMessageParser
+class JobMessageEncoder implements JobMessageEncoderInterface
 {
     /**
      * @var static
@@ -25,7 +25,7 @@ class JobMessageParser
     /**
      * @param self $instance
      */
-    public static function setInstance($instance): void
+    public static function setInstance(JobMessageEncoderInterface $instance): void
     {
         self::$instance = $instance;
     }
@@ -33,16 +33,15 @@ class JobMessageParser
     /**
      * @return static
      */
-    public static function getInstance()
+    public static function getInstance() : JobMessageEncoderInterface
     {
-        if (isset(static::$instance)) {
-            return static::$instance;
+        if (!isset(static::$instance)) {
+            static::$instance = new static();
         }
-        static::$instance = new static();
         return static::$instance;
     }
 
-    public function makePushMessage($message)
+    public function encode($message): string
     {
         if (is_callable($message)) {
             $serializerType = Factory::SERIALIZER_TYPE_CLOSURE;
@@ -66,7 +65,7 @@ class JobMessageParser
         ]);
     }
 
-    public function parseJobMessage($payload)
+    public function decode($payload)
     {
         if (empty($payload)
             || empty($message = json_decode($payload, true))

@@ -7,8 +7,7 @@ use Composer\Autoload\ClassLoader;
 use Littlesqx\AintQueue\Driver\DriverFactory;
 use Littlesqx\AintQueue\Driver\Redis\Queue;
 
-$loader = require __DIR__ . '/../../../vendor/autoload.php';
-$loader->addPsr4('App\\', dirname(__DIR__) . '/app');
+require(__DIR__ . '/boot.inc.php');
 
 $config = require dirname(__DIR__) . '/config/aint-queue.php';
 
@@ -21,10 +20,12 @@ $queue = DriverFactory::make($channel, $driverOption);
 //    echo "Hello AintQueue\n";
 //});
 
+$queue->push('simpleJob', 1);
+
 $queue->push(SimpleJob::class, 2);
 
 $queue->push([
-    SimpleJob::class,
+    'simpleJob',
     [
         ['info_id' => 10, 'delay' => 5]
     ]

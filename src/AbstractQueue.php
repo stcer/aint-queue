@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace Littlesqx\AintQueue;
 
-use Littlesqx\AintQueue\Driver\JobMessageParser;
+use Littlesqx\AintQueue\Serializer\JobMessageEncoder;
 
 abstract class AbstractQueue implements QueueInterface
 {
@@ -50,15 +50,28 @@ abstract class AbstractQueue implements QueueInterface
     protected $options;
 
     /**
-     * @var JobMessageParser
+     * @var JobMessageEncoder
      */
-    protected $messageParser;
+    protected $messageEncoder;
 
     public function __construct(string $channel, array $options = [])
     {
         $this->channel = $channel;
         $this->options = $options;
-        $this->messageParser = JobMessageParser::getInstance();
+    }
+
+    public function setMessageEncoder(JobMessageEncoderInterface $messageEncoder): void
+    {
+        $this->messageEncoder = $messageEncoder;
+    }
+
+    public function getMessageEncoder(): JobMessageEncoderInterface
+    {
+        if (!isset($this->messageEncoder)) {
+            $this->messageEncoder = JobMessageEncoder::getInstance();
+        }
+
+        return $this->messageEncoder;
     }
 
     /**

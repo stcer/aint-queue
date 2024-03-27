@@ -83,7 +83,7 @@ class Queue extends AbstractQueue
      */
     public function push($message, int $delay = 0): void
     {
-        $pushMessage = $this->messageParser->makePushMessage($message);
+        $pushMessage = $this->getMessageEncoder()->encode($message);
         $redis = $this->getConnection();
 
         $id = $redis->incr("{$this->channelPrefix}{$this->channel}:message_id");
@@ -273,12 +273,12 @@ class Queue extends AbstractQueue
         $attempts = $redis->hget("{$this->channelPrefix}{$this->channel}:attempts", $id);
         $payload = $redis->hget("{$this->channelPrefix}{$this->channel}:messages", $id);
 
-        $jobInstance = $this->messageParser->parseJobMessage($payload);
-        if (empty($jobInstance)) {
+        $job = $this->getMessageEncoder()->decode($payload);
+        if (empty($job)) {
             throw new InvalidJobException(sprintf('Broken message payload[%d]: %s', $id, $payload));
         }
 
-        return [$id, (int) $attempts, $jobInstance];
+        return [$id, (int) $attempts, $job];
     }
 
     /**
