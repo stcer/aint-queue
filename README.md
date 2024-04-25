@@ -31,6 +31,8 @@
 
 ```shell
 composer require littlesqx/aint-queue -vvv
+# or
+composer require stcer/aint-queue -vvv
 ```
 
 ## Usage

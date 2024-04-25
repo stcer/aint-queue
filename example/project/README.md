@@ -33,7 +33,7 @@ via Console
 ```bash
 ./vendor/bin/aint-queue queue:status --channel=example
 # or
-/var/www/html# bin/aint-queue queue:status --channel=example -c example/project/config/aint-queue.php 
+bin/aint-queue queue:status --channel=example -c example/project/config/aint-queue.php 
 
 php example/project/bin/demo-app queue:status -c example/project/config/aint-queue.php --channel=example
 ```
