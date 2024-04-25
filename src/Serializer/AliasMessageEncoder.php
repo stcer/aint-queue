@@ -1,18 +1,16 @@
 <?php
-#MessageEncoder.php created by stcer@jz at 2024/3/27
-namespace App\Job;
+#AliasMessageEncoder.php created by stcer@jz at 2024/4/24
+namespace Littlesqx\AintQueue\Serializer;
 
 use Littlesqx\AintQueue\JobMessageEncoderInterface;
-use Littlesqx\AintQueue\Serializer\JsonSerializer;
 use ReflectionClass;
 use function count;
 use function is_array;
 use function json_decode;
 
-class MessageEncoder implements JobMessageEncoderInterface
+class AliasMessageEncoder implements JobMessageEncoderInterface
 {
-    public $classMap = [
-        'simpleJob' => SimpleJob::class
+    protected $classMap = [
     ];
 
     public function encode($message): string
@@ -38,5 +36,18 @@ class MessageEncoder implements JobMessageEncoderInterface
 
         $class = new ReflectionClass($class);
         return $class->newInstanceArgs($arguments);
+    }
+
+    /**
+     * @param \class-string[] $classMap
+     */
+    public function setClassMap(array $classMap): void
+    {
+        $this->classMap = $classMap;
+    }
+
+    public function addClassMap($key, $value)
+    {
+        $this->classMap[$key] = $value;
     }
 }

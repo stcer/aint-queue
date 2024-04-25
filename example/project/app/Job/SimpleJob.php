@@ -12,9 +12,7 @@ namespace App\Job;
 
 use Littlesqx\AintQueue\JobInterface;
 use Littlesqx\AintQueue\JobMiddlewareInterface;
-use function date;
-use function sprintf;
-use function var_dump;
+use function var_export;
 
 class SimpleJob implements JobInterface
 {
@@ -27,13 +25,10 @@ class SimpleJob implements JobInterface
 
     /**
      * Execute current job.
-     *
-     * @return mixed
      */
     public function handle(): void
     {
-        echo sprintf("Hello World %s\n", date("Y-m-d H:i:s"));
-        var_dump($this->args);
+        echo sprintf("Hello World %s\n", time()) . var_export($this->args, true) . "\n\n";
     }
 
     /**

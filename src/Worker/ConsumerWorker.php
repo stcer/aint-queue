@@ -16,6 +16,8 @@ use Illuminate\Pipeline\Pipeline;
 use Littlesqx\AintQueue\Exception\InvalidJobException;
 use Littlesqx\AintQueue\JobInterface;
 use Swoole\Coroutine;
+use function call_user_func;
+use function is_callable;
 
 class ConsumerWorker extends AbstractWorker
 {
@@ -120,11 +122,20 @@ class ConsumerWorker extends AbstractWorker
             if (empty($job)) {
                 throw new InvalidJobException('Job popped is empty.');
             }
-            is_callable($job) ? $job() : $this->pipeline->send($job)
-                ->through($job->middleware())
-                ->then(function (JobInterface $job) {
+
+            if (is_callable($job)) {
+                call_user_func($job);
+            } else {
+                if ($middlewares = $job->middleware()) {
+                    $this->pipeline->send($job)
+                        ->through($middlewares)
+                        ->then(function (JobInterface $job) {
+                            $job->handle();
+                        });
+                } else {
                     $job->handle();
-                });
+                }
+            }
             $this->queue->remove($messageId);
         } catch (\Throwable $t) {
             $attempts = $attempts ?? 0;

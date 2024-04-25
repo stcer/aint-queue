@@ -36,7 +36,7 @@ class WorkerStopCommand extends AbstractCommand
         if (!$this->manager->isRunning()) {
             $output->writeln("The master-process of {$channel}-queue is not running!\n");
 
-            return;
+            return self::FAILURE;
         }
 
         $io = new SymfonyStyle($input, $output);
@@ -47,6 +47,6 @@ class WorkerStopCommand extends AbstractCommand
             $io->writeln('Success to stop!');
         }
 
-        return 0;
+        return self::SUCCESS;
     }
 }

@@ -34,10 +34,17 @@ via Console
 ./vendor/bin/aint-queue queue:status --channel=example
 # or
 /var/www/html# bin/aint-queue queue:status --channel=example -c example/project/config/aint-queue.php 
+
+php example/project/bin/demo-app queue:status -c example/project/config/aint-queue.php --channel=example
 ```
 
 or start the dashboard server
 
 ```
 ./vendor/bin/aint-queue queue:dashboard  --addr={$ip}:{$host} --channel=example
+```
+
+stop server
+```
+php example/project/bin/demo-app worker:stop -c example/project/config/aint-queue.php --channel=example
 ```

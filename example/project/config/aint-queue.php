@@ -8,8 +8,8 @@
  * This source file is subject to the MIT license that is bundled.
  */
 
-use App\Job\MessageEncoder;
 use Littlesqx\AintQueue\Driver\Redis\Queue as RedisQueue;
+use Littlesqx\AintQueue\Serializer\AliasMessageEncoder;
 
 return [
     'example' => [
@@ -21,7 +21,11 @@ return [
                 'database' => '0',
                 // 'password' => 'password',
             ],
-            'encoder' => MessageEncoder::class,
+            'encoder' => function() {
+                $encoder = new AliasMessageEncoder();
+                $encoder->addClassMap('simpleJob', \App\Job\SimpleJob::class);
+                return $encoder;
+            },
         ],
         'logger' => [
             'class' => \Littlesqx\AintQueue\Logger\DefaultLogger::class,
@@ -34,7 +38,7 @@ return [
             'sleep_seconds' => 1,
             'memory_limit' => 96,
             'dynamic_mode' => true,
-            'capacity' => 6,
+            'capacity' => 20,
             'flex_interval' => 5 * 60,
             'min_worker_number' => 5,
             'max_worker_number' => 30,

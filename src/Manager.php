@@ -100,7 +100,6 @@ class Manager
         $pidFile = $this->getPidFile();
         if (file_exists($pidFile)) {
             $pid = (int) file_get_contents($pidFile);
-
             return Process::kill($pid, 0);
         }
 

@@ -2,7 +2,6 @@
 
 /** @var ClassLoader $loader */
 
-use App\Job\SimpleJob;
 use Composer\Autoload\ClassLoader;
 use Littlesqx\AintQueue\Driver\DriverFactory;
 use Littlesqx\AintQueue\Driver\Redis\Queue;
@@ -16,29 +15,31 @@ $driverOption = $config[$channel]['driver'] ?? [];
 
 /** @var Queue $queue */
 $queue = DriverFactory::make($channel, $driverOption);
-//$queue->push(function (){
-//    echo "Hello AintQueue\n";
-//});
 
-$queue->push('simpleJob', 1);
+while (true) {
+    for ($i = 0; $i < 50; $i++) {
+        echo "Start push {$i}\n";
+        $expire = rand(36, 1296000);
+//        $expire = rand(1, 10);
+        $date = time();
+        $queue->push([
+            // SimpleJob::class,
+            'NTY',
+            [
+                [
+                    'gid' => rand(1,1000000),
+                    'prt' => rand(1,1000000),
+                    'st' => $date,
+                    'e' => $expire,
+                    'ed' => $date + $expire,
+                    't' => "物料名称abc, 半成熟" . $i,
+                    'pu' => '测试者' . $i
+                ]
+            ]
+        ], $expire);
+    }
+    sleep(1);
+}
 
-$queue->push(SimpleJob::class, 2);
-
-$queue->push([
-    'simpleJob',
-    [
-        ['info_id' => 10, 'delay' => 5]
-    ]
-], 5);
-
-
-$queue->push([
-    SimpleJob::class,
-    [
-        ['info_id' => 12, 'delay' => 10]
-    ]
-], 10);
-
-//$queue->push(new CoroutineJob());
 
 echo "Client send ok\n";
