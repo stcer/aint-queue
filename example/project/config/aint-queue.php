@@ -8,7 +8,9 @@
  * This source file is subject to the MIT license that is bundled.
  */
 
+use App\Job\SimpleJob;
 use Littlesqx\AintQueue\Driver\Redis\Queue as RedisQueue;
+use Littlesqx\AintQueue\Logger\DefaultLogger;
 use Littlesqx\AintQueue\Serializer\AliasMessageEncoder;
 
 return [
@@ -23,12 +25,13 @@ return [
             ],
             'encoder' => function() {
                 $encoder = new AliasMessageEncoder();
-                $encoder->addClassMap('simpleJob', \App\Job\SimpleJob::class);
+                $encoder->addClassMap('simpleJob', SimpleJob::class);
+                $encoder->addClassMap('NTY', SimpleJob::class);
                 return $encoder;
             },
         ],
         'logger' => [
-            'class' => \Littlesqx\AintQueue\Logger\DefaultLogger::class,
+            'class' => DefaultLogger::class,
             'options' => [
                 'level' => \Monolog\Logger::DEBUG,
             ],
